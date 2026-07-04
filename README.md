@@ -2,37 +2,41 @@
 
 The classical four-step model — **trip generation → trip distribution → mode
 choice → trip assignment** — implemented end-to-end on **real, open data for
-Milan**: the actual major-road network and municipal boundary from
-OpenStreetMap, a hexagonal zone system, and land use proxied from OSM
-residential areas and workplace features. Pure Python (OSMnx + GeoPandas +
-NetworkX + NumPy), no modelling software, no bundled datasets — everything
+Milan**, and pushed past the textbook baseline: real GTFS transit times, user
+equilibrium via MSA, and a policy scenario. Pure Python (OSMnx + GeoPandas +
+SciPy + NetworkX), no modelling software, no bundled datasets — everything
 downloads at run time.
 
-**[→ Read the notebook](notebooks/four_step_model_milan.ipynb)** — every
-output is embedded, including the assignment and select-link maps on Milan's
-real street geometry.
+**[→ Read the notebook](notebooks/four_step_model_milan.ipynb)** · 
+**[→ interactive maps live at abadeanlou.com/four-step](https://abadeanlou.com/four-step/)**
 
 ## What's inside
 
 | Stage | Method |
 |---|---|
-| Network | OSM major roads (motorway → tertiary), largest strongly connected component, assumed speeds/capacities per road class |
-| Zones | ~1.2 km hexagonal grid clipped to the municipal boundary |
-| Land use | Population ∝ OSM `landuse=residential` area; jobs ∝ OSM workplace features — scaled to stated control totals |
+| Network | OSM major roads, largest strongly connected component, assumed speeds/capacities per class, compressed to SciPy sparse form for fast repeated assignment |
+| Zones & land use | ~1.2 km hex grid; population ∝ OSM residential area, jobs ∝ OSM workplace features, scaled to stated control totals |
 | 1. Generation | Production/attraction rates, attraction balancing |
 | 2. Distribution | Doubly-constrained gravity model, exponential deterrence, Furness/IPF |
-| 3. Mode choice | Binary logit, car vs public transport |
-| 4. Assignment | All-or-nothing shortest-path loading, v/c ratios by road class |
-| Extras | **Select-link analysis**, skim-matrix + GeoJSON exports |
+| 3. Mode choice | Binary logit on **real scheduled transit times** — a frequency-based transit graph built from Milan's official GTFS feed (boarding waits from AM-peak headways, scheduled in-vehicle times, walking transfers) |
+| 4. Assignment | **User equilibrium via the Method of Successive Averages** with BPR volume-delay, relative-gap convergence plot, v/c comparison against all-or-nothing |
+| Scenario | **Through-traffic ban in a 2.5 km inner cordon** (an Area-C-style measure): two-class equilibrium assignment, difference map of where banned trips relocate |
+| Extras | Select-link analysis at equilibrium, car + PT skim matrices, GeoJSON exports, folium interactive maps |
+
+## Data sources
+
+- Road network, boundary, land-use proxies: **OpenStreetMap** (via OSMnx)
+- Public transport: the official **GTFS feed** published on the
+  [Comune di Milano open-data portal](https://dati.comune.milano.it/dataset/ds929-orari-del-trasporto-pubblico-locale-nel-comune-di-milano-in-formato-gtfs)
+  (produced by AMAT from ATM scheduled service data)
 
 ## Honesty notes
 
-- Trip rates, deterrence and logit parameters, and the population/jobs control
-  totals are **stated assumptions**, not values calibrated to Milanese surveys
-  or counts. The notebook flags every one of them; swapping in census data and
-  calibrated parameters is the first upgrade of a real study.
-- Assignment is all-or-nothing; the closing section describes the equilibrium
-  extension a production model uses.
+- Trip rates, deterrence and logit parameters, BPR coefficients, and the
+  population/jobs control totals are **stated assumptions**, not values
+  calibrated to Milanese surveys or counts. The notebook flags every one.
+- The transit graph is frequency-based (headway/2 boarding waits), not a
+  timetable router; the closing section lists what a production model adds.
 - I have applied this same workflow to a real metropolitan planning network
   (~58,000 links with 2030/2040 scenario attributes); that dataset is not
   distributable, hence this open-data rebuild.
@@ -45,8 +49,8 @@ pip install -r requirements.txt
 jupyter lab notebooks/four_step_model_milan.ipynb
 ```
 
-First run downloads the Milan network and features from OSM (a few minutes,
-cached afterwards).
+First run downloads the Milan network, OSM features, and the ~26 MB GTFS feed
+(cached afterwards). Full execution takes several minutes.
 
 ## Related work
 

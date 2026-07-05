@@ -10,6 +10,13 @@ downloads at run time.
 **[→ Read the notebook](notebooks/four_step_model_milan.ipynb)** · 
 **[→ interactive maps live at abadeanlou.com/four-step](https://abadeanlou.com/four-step/)**
 
+![Milan user-equilibrium assignment — link bandwidth = volume](docs/equilibrium_assignment.png)
+
+*User-equilibrium car assignment on Milan's real network; below, the Area-C-style
+through-traffic-ban scenario (red = more traffic, green = less):*
+
+![Scenario difference map](docs/scenario_difference.png)
+
 ## What's inside
 
 | Stage | Method |
